@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/slownik.dir/link.d CMakeFiles/slownik.dir/main.cpp.o -o slownik

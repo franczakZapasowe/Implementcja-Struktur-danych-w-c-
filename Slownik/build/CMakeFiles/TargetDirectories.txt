@@ -1,0 +1,3 @@
+/home/mf/Implementacja_Struktur_Danych/Slownik/build/CMakeFiles/slownik.dir
+/home/mf/Implementacja_Struktur_Danych/Slownik/build/CMakeFiles/edit_cache.dir
+/home/mf/Implementacja_Struktur_Danych/Slownik/build/CMakeFiles/rebuild_cache.dir

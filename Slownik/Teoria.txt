@@ -1,0 +1,94 @@
+
+## Część 1: Teoria pod maską
+Hash mapa to struktura, która pozwala zapisywać i odczytywać dane w oparciu o pary **klucz-wartość**
+w czasie bliskim stałemu. Opiera się na następujących filarach:
+
+* **Tablica Wskaźników (Wiadra):** Głównym szkieletem mapy jest dynamiczna tablica. W przypadku łańcuchowania, każdy indeks tej tablicy (wiadro) nie trzyma bezpośrednio danych, ale wskaźnik na początek listy kierunkowej.
+* **Kolizje:** Ponieważ pojemność tablicy jest ograniczona, różne klucze po przeliczeniu mogą trafić pod ten sam indeks. Zjawisko to nazywamy kolizją.
+* **Łańcuchowanie (Chaining):** Rozwiązanie problemu kolizji. Jeśli dwa klucze trafiają do tego samego wiadra, tworzymy z nich listę powiązaną. Nowy element jest podczepiany do poprzedniego (lub wstawiany na sam początek listy, co jest wydajniejsze).
+* **Współczynnik Wypełnienia (Load Factor):** To stosunek liczby wszystkich elementów w mapie do rozmiaru głównej tablicy. Jeśli przekroczy pewien próg (zazwyczaj 0.75), łańcuchy stają się za długie i mapa traci swoją szybkość. Wtedy należy wykonać przebudowę (Rehash).
+
+---
+
+## Część 2: Architektura i Implementacja
+
+Do zbudowania całości potrzebujesz dwóch głównych elementów: węzła oraz samej mapy.
+
+### 1. Węzeł (Node)
+
+Pojedynczy "klocek" w Twoich łańcuchach. Musi przechowywać trzy rzeczy:
+
+1. **Klucz** (np. tekstowy, liczbowy).
+2. **Wartość** (dane, które przechowujesz).
+3. **Wskaźnik** na następny węzeł w łańcuchu (domyślnie pusty/null).
+
+### 2. Klasa Hash Mapy
+
+Zarządca struktury. Powinien posiadać trzy główne pola:
+
+1. Wskaźnik na dynamiczną tablicę (która przechowuje wskaźniki na Węzły).
+2. Aktualną pojemność (rozmiar) tablicy.
+3. Licznik aktualnie przechowywanych elementów.
+
+### 3. Logika operacji (Interfejs)
+
+* **Wstawianie / Aktualizacja:**
+Przepuszczasz klucz przez funkcję mieszającą i bierzesz resztę z dzielenia przez rozmiar tablicy (modulo).
+Otrzymujesz indeks. Wchodzisz pod ten indeks i idziesz po liście węzeł po węźle.
+Jeśli znajdziesz ten sam klucz – nadpisujesz jego wartość. Jeśli dojdziesz do końca i go nie ma –
+tworzysz nowy Węzeł i wpinasz go (najlepiej na sam początek tej listy,
+zmieniając wskaźnik w tablicy głównej na nowy element).
+* **Wyszukiwanie:**
+Liczysz indeks. Skaczesz od węzła do węzła w konkretnym wiadrze i porównujesz klucze.
+Znajdziesz – oddajesz wartość. Koniec łańcucha – brak klucza.
+* **Usuwanie:**
+Podczas szukania elementu do usunięcia, musisz trzymać wskaźnik na węzeł *poprzedni*.
+Gdy znajdziesz cel, wskaźnik z poprzednika przepinasz na węzeł *następujący* po usuwanym.
+Dopiero wtedy uwalniasz pamięć usuwanego węzła.
+
+---
+
+## Część 3: Zarządzanie Pamięcią (Zasady C++)
+
+To punkt krytyczny. Hash mapa z łańcuchowaniem generuje mnóstwo małych alokacji pamięci.
+
+* **Destruktor (Sprzątanie):** Kiedy mapa kończy żywot, usunięcie samej głównej tablicy to katastrofa
+(wyciek pamięci Węzłów). Twój destruktor musi działać na dwóch pętlach:
+zewnętrzna przechodzi przez każdy indeks tablicy, a wewnętrzna "idzie po sznurku" danego łańcucha,
+zapisując wskaźnik na następny element i niszcząc obecny.
+Kiedy wszystkie łańcuchy będą zniszczone, dopiero wtedy niszczysz główną tablicę.
+* **Rehashing (Optymalizacja przebudowy):** Kiedy współczynnik wypełnienia jest zbyt duży, tworzysz nową, np. dwukrotnie większą tablicę. Zamiast tworzyć węzły na nowo (co wiąże się z kosztownym kopiowaniem i alokacją), powinieneś odczepiać stare Węzły z poprzednich list. Liczysz im nowy indeks (bo tablica jest większa, więc modulo da inny wynik) i po prostu przepinasz wskaźniki do nowej tablicy. Na koniec usuwasz tylko starą, płaską tablicę wskaźników.
+* **Kopiowanie mapy:** Pamiętaj, że w C++, jeśli przypiszesz jedną hash mapę do drugiej, domyślnie skopiuje się tylko wskaźnik do tablicy. Obie mapy będą operować na tych samych węzłach (co skończy się awarią przy próbie dwukrotnego usunięcia tych samych danych w destruktorze). Musisz to zablokować lub napisać własny konstruktor kopiujący (Głębokie Kopiowanie).
+
+---
+
+## Część 4: Funkcja Mieszająca (Hash Function)
+
+Funkcja mieszająca to matematyczny młynek. Jej zadaniem jest zamienić dowolny klucz w pozornie losową (ale w 100% powtarzalną dla tego samego klucza!) i dużą liczbę całkowitą. Następnie klasa mapy skompresuje tę dużą liczbę do wymiarów tablicy za pomocą operacji modulo.
+
+Dobry algorytm mieszający musi równomiernie rozsiewać dane. Jeśli funkcja jest słaba, większość kluczy trafi do 2-3 wiader, tworząc gigantyczne łańcuchy, przez co Twoja Hash Mapa zacznie działać tak wolno, jak zwykła lista kierunkowa.
+
+Oto co możesz zaimplementować na start:
+
+### 1. Dla kluczy liczbowych (np. `int`)
+
+Jeśli Twoim kluczem jest liczba całkowita, funkcja mieszająca może być niezwykle prosta. Często wystarczy po prostu zwrócić tę samą liczbę (tzw. Identity Hash). Czasami mnoży się ją przez dużą liczbę pierwszą, aby nieco "rozsypać" bity, zapobiegając zbijaniu się w grupy, jeśli klucze mają regularny wzorzec (np. wielokrotności liczby 10).
+
+### 2. Dla kluczy tekstowych (np. `std::string`)
+
+To częstszy i trudniejszy przypadek. Musisz zamienić ciąg znaków na jedną liczbę. Nie wystarczy zsumować kodów ASCII poszczególnych liter, ponieważ wtedy słowa "kot" i "tok" wygenerują ten sam hash (tzw. anagramy zemszczą się natychmiastowo).
+
+**Algorytm djb2 (Świetny wybór na początek):**
+To jeden z najpopularniejszych, genialnie prostych algorytmów dla tekstów, wymyślony przez Dana Bernsteina. Opiera się na liczbach pierwszych i przesunięciach bitowych:
+
+1. Zaczynasz od początkowej, magicznej wartości (najczęściej używa się liczby całkowitej $5381$).
+2. Iterujesz przez każdy znak w słowie (znak po znaku).
+3. W każdym kroku bierzesz swój dotychczasowy wynik, mnożysz go przez $33$ i dodajesz wartość numeryczną aktualnego znaku (kod ASCII).
+4. Powtarzasz to aż dojdziesz do końca słowa.
+
+Z matematycznego punktu widzenia, dla każdego kolejnego znaku wykonujesz operację:
+$hash = (hash \cdot 33) + znak$
+
+*(Podpowiedź implementacyjna: mnożenie przez 33 kompilatory często optymalizują poprzez przesunięcie bitowe o 5 w lewo i dodanie oryginalnej wartości: `(hash << 5) + hash`)*.
+
+Po przeliczeniu całego słowa, ta funkcja wypluwa gigantyczną liczbę. Dopiero na poziomie metody `insert` lub `get` w głównej klasie robisz: `indeks = wielki_hash % pojemnosc_tablicy`.
