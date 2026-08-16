@@ -15,51 +15,52 @@ HashMap::HashMap(int rozmiar) {
     }
 }
 
-HashMap::HashMap(const HashMap &h) {
+HashMap::HashMap(const HashMap &h):m_rozmiar(h.m_rozmiar),m_liczbaElementow(h.m_liczbaElementow) {
     if (h.m_tablica!=nullptr) {
-        m_rozmiar = h.m_rozmiar;
-        m_liczbaElementow = h.m_liczbaElementow;
         m_tablica = new Wezel*[m_rozmiar];
-        for (int i=0; i<m_rozmiar; i++) {
-            m_tablica[i] = nullptr;
-        }
         for (int i=0; i<m_rozmiar; i++) {
             if (h.m_tablica[i]!=nullptr) {
                 m_tablica[i] = new Wezel;
-                m_tablica[i]-> wartosc = h.m_tablica[i]->wartosc;
                 m_tablica[i]->klucz = h.m_tablica[i]->klucz;
+                m_tablica[i]->wartosc = h.m_tablica[i]->wartosc;
 
-                Wezel *staryWezel = h.m_tablica[i]->next; // iteruje nim
-                Wezel *nowyWezelOstatni = m_tablica[i]; // buduje nim
-                while (staryWezel!=nullptr) {
-                    nowyWezelOstatni->next = new Wezel;
-                    nowyWezelOstatni = nowyWezelOstatni->next;
-                    nowyWezelOstatni->wartosc = staryWezel->wartosc;
-                    nowyWezelOstatni->klucz = staryWezel->klucz;
-                    staryWezel = staryWezel->next;
+                Wezel*wskNastepny = h.m_tablica[i]->next;
+                Wezel*aktualny = m_tablica[i];
+
+                while (wskNastepny!=nullptr) {
+                    aktualny->next = new Wezel;
+                    aktualny = aktualny->next;
+                    aktualny->klucz = wskNastepny->klucz;
+                    aktualny->wartosc = wskNastepny->wartosc;
+                    wskNastepny = wskNastepny->next;
                 }
+            }else {
+                m_tablica[i] = nullptr;
             }
         }
+
     }else {
-        m_rozmiar = h.m_rozmiar;
-        m_tablica = new Wezel*[m_rozmiar];
-        for (int i=0; i<m_rozmiar; i++) {
-            m_tablica[i] = nullptr;
-        }
+        m_tablica = nullptr;
+        m_liczbaElementow = 0;
+        m_rozmiar = 0;
     }
 }
 
 HashMap & HashMap::operator=(const HashMap &h) {
     if (this!=&h) {
-        m_rozmiar = h.m_rozmiar;
-        delete []m_tablica;
-        m_tablica = nullptr;
-        if (h.m_tablica!=nullptr) {
-            m_tablica = new Wezel*[m_rozmiar];
-            for (int i=0; i<m_rozmiar; i++) {
-                m_tablica[i] = h.m_tablica[i];
+        //sprzatanie
+        for (int i=0; i<m_rozmiar; i++) {
+            if (m_tablica[i]!=nullptr) {
+                Wezel*wskDoUsuniecia = m_tablica[i];
+                Wezel*wskNastepny = h.m_tablica[i];
+                while (wskDoUsuniecia->next!=nullptr) {
+                    delete wskDoUsuniecia;
+
+                }
+
             }
         }
+
     }
     return *this;
 }
