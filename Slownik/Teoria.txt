@@ -45,7 +45,7 @@ Znajdziesz – oddajesz wartość. Koniec łańcucha – brak klucza.
 Podczas szukania elementu do usunięcia, musisz trzymać wskaźnik na węzeł *poprzedni*.
 Gdy znajdziesz cel, wskaźnik z poprzednika przepinasz na węzeł *następujący* po usuwanym.
 Dopiero wtedy uwalniasz pamięć usuwanego węzła.
-
+    
 ---
 
 ## Część 3: Zarządzanie Pamięcią (Zasady C++)

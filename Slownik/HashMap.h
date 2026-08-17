@@ -28,6 +28,7 @@ public:
     void insert(std::string,double wartosc);
     double serch(std::string);
     void usun(std::string);
+
 };
 
 #endif //SLOWNIK_HASHMAP_H

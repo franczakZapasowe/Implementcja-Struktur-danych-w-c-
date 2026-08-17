@@ -107,7 +107,7 @@ HashMap::~HashMap() {
 //funkcje pomocnicze
 size_t HashMap::hash(std::string str) {
     size_t hash = 5381;
-    for (auto i : str) {
+    for (unsigned char i : str) {
         hash += (hash *33)+i;
     }
     return hash;
@@ -148,6 +148,36 @@ double HashMap::serch(std::string klucz) {
                 return wsk->wartosc;
             }
             wsk = wsk->next;
+        }
+        throw std::invalid_argument("Klucz nie istnieje");
+    }else {
+        throw std::invalid_argument("Klucz nie istnieje");
+    }
+}
+
+void HashMap::usun(std::string klucz) {
+    int index = hash(klucz)%m_rozmiar;
+    if (m_tablica[index]!=nullptr) {
+        // przpyadek gdy 1 elemnt tablicy pasuje odrazu m_tablica[index]->klucz == klucz
+        Wezel *wsk = m_tablica[index]->next;
+        if (m_tablica[index]->klucz == klucz) {
+            delete m_tablica[index];
+            m_tablica[index] = wsk;
+            m_liczbaElementow--;
+            return;
+        }
+
+        Wezel *wskDoUsuniecia = m_tablica[index]->next;
+        Wezel *wskPoprzedni = m_tablica[index];
+        while (wskDoUsuniecia!=nullptr) {
+            if (klucz == wskDoUsuniecia->klucz) {
+                wskPoprzedni->next = wskDoUsuniecia->next;
+                delete wskDoUsuniecia;
+                m_liczbaElementow--;
+                return;
+            }
+            wskPoprzedni = wskDoUsuniecia;
+            wskDoUsuniecia = wskDoUsuniecia->next;
         }
         throw std::invalid_argument("Klucz nie istnieje");
     }else {
