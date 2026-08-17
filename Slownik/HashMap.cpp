@@ -52,11 +52,10 @@ HashMap & HashMap::operator=(const HashMap &h) {
         for (int i =0; i<m_rozmiar; i++) {
             if (m_tablica[i]!=nullptr) {
                 Wezel *wskAktualnyDoUsun = m_tablica[i];
-                Wezel *wskNastepny = m_tablica[i]->next;
                 while (wskAktualnyDoUsun!=nullptr) {
+                    Wezel *wskNastepny = wskAktualnyDoUsun ->next;
                     delete wskAktualnyDoUsun;
                     wskAktualnyDoUsun = wskNastepny;
-                    wskNastepny = wskNastepny->next;
                 }
             }
         }
@@ -73,7 +72,7 @@ HashMap & HashMap::operator=(const HashMap &h) {
                 m_tablica[i]->wartosc = h.m_tablica[i]->wartosc;
 
                 Wezel *aktualny = m_tablica[i];
-                Wezel *wskNastepny = m_tablica[i]->next;
+                Wezel *wskNastepny = h.m_tablica[i]->next;
                 while (wskNastepny!=nullptr) {
                     aktualny->next = new Wezel;
                     aktualny = aktualny->next;
@@ -81,6 +80,8 @@ HashMap & HashMap::operator=(const HashMap &h) {
                     aktualny->wartosc = wskNastepny->wartosc;
                     wskNastepny = wskNastepny->next;
                 }
+            }else {
+                m_tablica[i] = nullptr;
             }
         }
     }
@@ -91,11 +92,10 @@ HashMap::~HashMap() {
     for (int i =0; i<m_rozmiar; i++) {
         if (m_tablica[i]!=nullptr) {
             Wezel* wskAktuanyDoUsun = m_tablica[i];
-            Wezel* wskNastepny = m_tablica[i]->next;
             while (wskAktuanyDoUsun!=nullptr) {
+                Wezel* wskNastepny = wskAktuanyDoUsun->next;
                 delete wskAktuanyDoUsun;
                 wskAktuanyDoUsun = wskNastepny;
-                wskNastepny = wskNastepny->next;
             }
         }
     }
@@ -113,7 +113,7 @@ size_t HashMap::hash(std::string str) {
 }
 
 void HashMap::insert(std::string str,double wartosc) {
-    
+
 }
 
 void HashMap::serch() {
