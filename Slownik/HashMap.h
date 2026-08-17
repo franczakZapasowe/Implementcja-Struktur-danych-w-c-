@@ -26,10 +26,8 @@ public:
     HashMap &operator=(const HashMap &h);
     ~HashMap();
     void insert(std::string,double wartosc);
-    void serch();
-    void usun();
-    // konstruktory kopiujace itp
+    double serch(std::string);
+    void usun(std::string);
 };
-
 
 #endif //SLOWNIK_HASHMAP_H

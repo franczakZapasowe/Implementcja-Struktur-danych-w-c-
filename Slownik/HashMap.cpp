@@ -4,6 +4,7 @@
 
 #include "HashMap.h"
 #include <cstring>
+#include <stdexcept>
 
 HashMap::HashMap(int rozmiar) {
     if (rozmiar>0) {
@@ -113,11 +114,43 @@ size_t HashMap::hash(std::string str) {
 }
 
 void HashMap::insert(std::string str,double wartosc) {
-
+    int indeks = hash(str) % m_rozmiar;
+    if (m_tablica[indeks]!=nullptr) {
+        Wezel *wsk = m_tablica[indeks];
+        Wezel *wskPoprzedni;
+        while (wsk!=nullptr) {
+            wskPoprzedni = wsk;
+            if (wsk->klucz == str) {
+                wsk->wartosc = wartosc;
+                return;
+            }
+            wsk = wsk->next;
+        }
+            wsk = new Wezel;
+            wsk->klucz = str;
+            wsk->wartosc = wartosc;
+            wskPoprzedni->next = wsk;
+            m_liczbaElementow++;
+    }else {
+        m_tablica[indeks] = new Wezel;
+        m_tablica[indeks]->klucz = str;
+        m_tablica[indeks]->wartosc = wartosc;
+        m_liczbaElementow++;
+    }
 }
 
-void HashMap::serch() {
-}
-
-void HashMap::usun() {
+double HashMap::serch(std::string klucz) {
+    int index = hash(klucz)%m_rozmiar;
+    if (m_tablica[index]!=nullptr) {
+        Wezel *wsk = m_tablica[index];
+        while (wsk!=nullptr) {
+            if (wsk->klucz == klucz) {
+                return wsk->wartosc;
+            }
+            wsk = wsk->next;
+        }
+        throw std::invalid_argument("Klucz nie istnieje");
+    }else {
+        throw std::invalid_argument("Klucz nie istnieje");
+    }
 }
